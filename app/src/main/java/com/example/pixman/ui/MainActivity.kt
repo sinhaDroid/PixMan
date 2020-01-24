@@ -17,6 +17,8 @@ import com.example.pixman.ui.base.BaseActivity
 import com.example.pixman.ui.view.EditImageFragment
 import com.example.pixman.ui.view.HomeFragment
 import com.example.pixman.ui.viewmodel.MainViewModel
+import com.example.pixman.util.Constants.RequestKeys.Companion.CAMERA_REQUEST
+import com.example.pixman.util.Constants.RequestKeys.Companion.PICK_REQUEST
 import com.example.pixman.util.getFragmentInstance
 import kotlinx.android.synthetic.main.activity_main.*
 import java.io.IOException
@@ -30,9 +32,6 @@ class MainActivity : BaseActivity<ActivityMainBinding, MainViewModel>() {
     override fun viewModel(): Class<MainViewModel> = MainViewModel::class.java
 
     override fun bindingVariable(): Int = BR.main
-
-    private val CAMERA_REQUEST = 52
-    private val PICK_REQUEST = 53
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -79,7 +78,7 @@ class MainActivity : BaseActivity<ActivityMainBinding, MainViewModel>() {
         if (resultCode == Activity.RESULT_OK) {
             when (requestCode) {
                 CAMERA_REQUEST -> {
-                    val photo = data?.extras!!["data"] as Bitmap?
+                    val photo = data?.extras!!["data"] as Bitmap
                     getFragmentInstance<HomeFragment>(
                         supportFragmentManager,
                         R.id.nav_host_fragment_main

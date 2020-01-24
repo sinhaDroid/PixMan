@@ -23,8 +23,7 @@ import dagger.android.HasAndroidInjector
 import javax.inject.Inject
 
 
-abstract class BaseActivity<DB : ViewDataBinding, VM : ViewModel> : AppCompatActivity(),
-    HasAndroidInjector {
+abstract class BaseActivity<DB : ViewDataBinding, VM : ViewModel> : AppCompatActivity(), HasAndroidInjector {
 
     private lateinit var viewDataBinding: DB
 

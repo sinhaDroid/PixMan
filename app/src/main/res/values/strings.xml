@@ -6,4 +6,6 @@
     <string name="label_eraser_mode">Eraser Mode</string>
     <string name="label_text">Text</string>
     <string name="msg_save_image">Are you want to exit without saving image ?</string>
+    <string name="camera">Camera</string>
+    <string name="gallery">Gallery</string>
 </resources>

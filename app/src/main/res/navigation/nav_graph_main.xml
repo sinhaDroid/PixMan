@@ -11,11 +11,15 @@
         android:label="fragment_home"
         tools:layout="@layout/fragment_home">
         <action
-            android:id="@+id/action_homeFragment_to_editImageActivity"
+            android:id="@+id/action_home_to_editImage"
             app:destination="@id/editImage" />
     </fragment>
     <fragment
         android:id="@+id/editImage"
         android:name="com.example.pixman.ui.view.EditImageFragment"
-        tools:layout="@layout/fragment_edit_image" />
+        tools:layout="@layout/fragment_edit_image" >
+        <argument
+            android:name="bitmapData"
+            app:argType="android.graphics.Bitmap" />
+    </fragment>
 </navigation>
