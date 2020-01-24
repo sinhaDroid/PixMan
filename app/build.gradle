@@ -6,6 +6,8 @@ apply plugin: 'kotlin-android-extensions'
 
 apply plugin: 'kotlin-kapt'
 
+apply plugin: 'androidx.navigation.safeargs'
+
 android {
     compileSdkVersion 29
     defaultConfig {
@@ -63,6 +65,14 @@ dependencies {
     implementation "androidx.lifecycle:lifecycle-livedata-ktx:$lifecycle_version"
     implementation "androidx.lifecycle:lifecycle-runtime-ktx:$lifecycle_version"
     implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycle_version"
+
+    // Navigation
+    def nav_version = "2.1.0"
+
+    // For Kotlin use navigation-fragment-ktx
+    implementation "androidx.navigation:navigation-fragment-ktx:$nav_version"
+    // For Kotlin use navigation-ui-ktx
+    implementation "androidx.navigation:navigation-ui-ktx:$nav_version"
 
     def retrofit = '2.6.3'
     implementation "com.squareup.retrofit2:converter-gson:$retrofit"
