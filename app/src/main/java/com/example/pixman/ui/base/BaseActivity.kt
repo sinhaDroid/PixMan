@@ -91,7 +91,7 @@ abstract class BaseActivity<DB : ViewDataBinding, VM : ViewModel> : AppCompatAct
         }
     }
 
-    protected fun showLoading(message: String) {
+    fun showLoading(message: String) {
         mProgressDialog = ProgressDialog(this)
         mProgressDialog!!.setMessage(message)
         mProgressDialog!!.setProgressStyle(ProgressDialog.STYLE_SPINNER)
@@ -99,13 +99,13 @@ abstract class BaseActivity<DB : ViewDataBinding, VM : ViewModel> : AppCompatAct
         mProgressDialog!!.show()
     }
 
-    protected fun hideLoading() {
+    fun hideLoading() {
         if (mProgressDialog != null) {
             mProgressDialog!!.dismiss()
         }
     }
 
-    protected fun showSnackbar(message: String) {
+    fun showSnackbar(message: String) {
         val view = findViewById<View>(R.id.content)
         if (view != null) {
             Snackbar.make(view, message, Snackbar.LENGTH_SHORT).show()

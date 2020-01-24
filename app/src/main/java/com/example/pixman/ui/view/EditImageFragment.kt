@@ -7,76 +7,71 @@ import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
-import android.os.Parcelable
 import android.provider.MediaStore
 import android.util.Log
 import android.view.View
-import android.widget.ImageView
-import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.example.pixman.BR
 import com.example.pixman.R
-import com.example.pixman.databinding.ActivityEditImageBinding
-import com.example.pixman.ui.base.BaseActivity
+import com.example.pixman.databinding.FragmentEditImageBinding
+import com.example.pixman.ui.MainActivity
+import com.example.pixman.ui.base.BaseFragment
 import com.example.pixman.ui.viewmodel.MainViewModel
 import com.example.pixman.util.*
 import com.example.pixman.util.EditingToolsAdapter.OnItemSelected
-import com.example.pixman.util.PhotoEditor.OnSaveListener
 import java.io.File
 import java.io.IOException
 
-class EditImageActivity : BaseActivity<ActivityEditImageBinding, MainViewModel>(),
+class EditImageFragment : BaseFragment<FragmentEditImageBinding, MainViewModel>(),
     OnPhotoEditorListener,
     View.OnClickListener, PropertiesBSFragment.Properties, OnItemSelected {
+
+    override val layoutRes: Int
+        get() = R.layout.fragment_edit_image
+
+    override fun bindingVariable(): Int = BR.main
+
+    override fun getViewModel(): Class<MainViewModel> = MainViewModel::class.java
+
     lateinit var mPhotoEditor: PhotoEditor
-    private var mPhotoEditorView: PhotoEditorView? = null
     private var mPropertiesBSFragment: PropertiesBSFragment? = null
-    private var mTxtCurrentTool: TextView? = null
-    private var mRvTools: RecyclerView? = null
     private val mEditingToolsAdapter = EditingToolsAdapter(this)
-    override fun onCreate(savedInstanceState: Bundle?) {
-        makeFullScreen()
-        super.onCreate(savedInstanceState)
-        initViews()
-        mPropertiesBSFragment = PropertiesBSFragment()
-        mPropertiesBSFragment!!.setPropertiesChangeListener(this)
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        dataBinding.imgUndo.setOnClickListener(this)
+        dataBinding.imgRedo.setOnClickListener(this)
+        dataBinding.imgSave.setOnClickListener(this)
+        dataBinding.imgClose.setOnClickListener(this)
+
         val llmTools =
-            LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
-        mRvTools!!.layoutManager = llmTools
-        mRvTools!!.adapter = mEditingToolsAdapter
-        mPhotoEditor = PhotoEditor.Builder(this, mPhotoEditorView)
+            LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
+        dataBinding.rvConstraintTools.layoutManager = llmTools
+        dataBinding.rvConstraintTools.adapter = mEditingToolsAdapter
+        mPhotoEditor = PhotoEditor.Builder(requireContext(), dataBinding.photoEditorView)
             .setPinchTextScalable(true) // set flag to make text scalable when pinch
             .build() // build photo editor sdk
+
+        mPropertiesBSFragment = PropertiesBSFragment()
+        mPropertiesBSFragment!!.setPropertiesChangeListener(this)
         mPhotoEditor.setOnPhotoEditorListener(this)
+
         // Get data from intent
-        val intent = intent
-        val bitmapIntent = intent.getParcelableExtra<Parcelable>("BitmapImage") as Intent
+        val intent = requireActivity().intent
+        val bitmapIntent = intent.getParcelableExtra("BitmapImage") as Intent
         val uri = bitmapIntent.data
         var bitmap: Bitmap? = null
         try {
-            bitmap = MediaStore.Images.Media.getBitmap(contentResolver, uri)
+            bitmap = MediaStore.Images.Media.getBitmap(requireActivity().contentResolver, uri)
             //Set Image Dynamically
-            mPhotoEditorView!!.source.setImageBitmap(bitmap)
+            dataBinding.photoEditorView.source.setImageBitmap(bitmap)
         } catch (e: IOException) {
             e.printStackTrace()
-            finish()
+            requireActivity().finish()
         }
-    }
-
-    private fun initViews() {
-        mPhotoEditorView = findViewById(R.id.photoEditorView)
-        mTxtCurrentTool = findViewById(R.id.txtCurrentTool)
-        mRvTools = findViewById(R.id.rvConstraintTools)
-        val imgUndo: ImageView = findViewById(R.id.imgUndo)
-        imgUndo.setOnClickListener(this)
-        val imgRedo: ImageView = findViewById(R.id.imgRedo)
-        imgRedo.setOnClickListener(this)
-        val imgSave: ImageView = findViewById(R.id.imgSave)
-        imgSave.setOnClickListener(this)
-        val imgClose: ImageView = findViewById(R.id.imgClose)
-        imgClose.setOnClickListener(this)
     }
 
     override fun onEditTextChangeListener(
@@ -86,7 +81,7 @@ class EditImageActivity : BaseActivity<ActivityEditImageBinding, MainViewModel>(
     ) {
         val textEditorDialogFragment =
             TextEditorDialogFragment.show(
-                this,
+                requireActivity() as MainActivity,
                 text,
                 colorCode
             )
@@ -96,7 +91,7 @@ class EditImageActivity : BaseActivity<ActivityEditImageBinding, MainViewModel>(
                 val styleBuilder = TextStyleBuilder()
                 styleBuilder.withTextColor(colorCode)
                 mPhotoEditor.editText(rootView, inputText, styleBuilder)
-                mTxtCurrentTool!!.setText(R.string.label_text)
+                dataBinding.txtCurrentTool.text = getString(R.string.label_text)
             }
 
         })
@@ -138,10 +133,10 @@ class EditImageActivity : BaseActivity<ActivityEditImageBinding, MainViewModel>(
 
     override fun onClick(view: View) {
         when (view.id) {
-            R.id.imgUndo -> mPhotoEditor!!.undo()
-            R.id.imgRedo -> mPhotoEditor!!.redo()
+            R.id.imgUndo -> mPhotoEditor.undo()
+            R.id.imgRedo -> mPhotoEditor.redo()
             R.id.imgSave -> saveImage()
-            R.id.imgClose -> onBackPressed()
+            R.id.imgClose -> requireActivity().onBackPressed()
         }
     }
 
@@ -163,11 +158,11 @@ class EditImageActivity : BaseActivity<ActivityEditImageBinding, MainViewModel>(
                 mPhotoEditor.saveAsFile(
                     file.absolutePath,
                     saveSettings,
-                    object : OnSaveListener {
+                    object : PhotoEditor.OnSaveListener {
                         override fun onSuccess(imagePath: String) {
                             hideLoading()
                             showSnackbar("Image Saved Successfully")
-                            mPhotoEditorView!!.source
+                            dataBinding.photoEditorView.source
                                 .setImageURI(Uri.fromFile(File(imagePath)))
                         }
 
@@ -185,18 +180,18 @@ class EditImageActivity : BaseActivity<ActivityEditImageBinding, MainViewModel>(
     }
 
     override fun onColorChanged(colorCode: Int) {
-        mPhotoEditor!!.brushColor = colorCode
-        mTxtCurrentTool!!.setText(R.string.label_brush)
+        mPhotoEditor.brushColor = colorCode
+        dataBinding.txtCurrentTool.text = getString(R.string.label_brush)
     }
 
     override fun onOpacityChanged(opacity: Int) {
-        mPhotoEditor!!.setOpacity(opacity)
-        mTxtCurrentTool!!.setText(R.string.label_brush)
+        mPhotoEditor.setOpacity(opacity)
+        dataBinding.txtCurrentTool.text = getString(R.string.label_brush)
     }
 
     override fun onBrushSizeChanged(brushSize: Int) {
         mPhotoEditor.brushSize = brushSize.toFloat()
-        mTxtCurrentTool!!.setText(R.string.label_brush)
+        dataBinding.txtCurrentTool.text = getString(R.string.label_brush)
     }
 
     override fun isPermissionGranted(
@@ -210,28 +205,28 @@ class EditImageActivity : BaseActivity<ActivityEditImageBinding, MainViewModel>(
 
     private fun showSaveDialog() {
         val builder =
-            AlertDialog.Builder(this)
+            AlertDialog.Builder(requireContext())
         builder.setMessage(getString(R.string.msg_save_image))
         builder.setPositiveButton("Save") { dialog, which -> saveImage() }
         builder.setNegativeButton("Cancel") { dialog, which -> dialog.dismiss() }
-        builder.setNeutralButton("Discard") { dialog, which -> finish() }
+        builder.setNeutralButton("Discard") { dialog, which -> requireActivity().finish() }
         builder.create().show()
     }
 
     override fun onToolSelected(toolType: ToolType) {
         when (toolType) {
             ToolType.BRUSH -> {
-                mPhotoEditor!!.setBrushDrawingMode(true)
-                mTxtCurrentTool!!.setText(R.string.label_brush)
+                mPhotoEditor.setBrushDrawingMode(true)
+                dataBinding.txtCurrentTool.text = getString(R.string.label_brush)
                 mPropertiesBSFragment!!.show(
-                    supportFragmentManager,
+                    requireFragmentManager(),
                     mPropertiesBSFragment!!.tag
                 )
             }
             ToolType.TEXT -> {
                 val textEditorDialogFragment =
                     TextEditorDialogFragment.show(
-                        this
+                        requireActivity() as MainActivity
                     )
                 textEditorDialogFragment.setOnTextEditorListener(object :
                     TextEditorDialogFragment.TextEditor {
@@ -239,34 +234,27 @@ class EditImageActivity : BaseActivity<ActivityEditImageBinding, MainViewModel>(
                         val styleBuilder = TextStyleBuilder()
                         styleBuilder.withTextColor(colorCode)
                         mPhotoEditor.addText(inputText, styleBuilder)
-                        mTxtCurrentTool!!.setText(R.string.label_text)
+                        dataBinding.txtCurrentTool.text = getString(R.string.label_text)
                     }
 
                 })
             }
             ToolType.ERASER -> {
-                mPhotoEditor!!.brushEraser()
-                mTxtCurrentTool!!.setText(R.string.label_eraser_mode)
+                mPhotoEditor.brushEraser()
+                dataBinding.txtCurrentTool.text = getString(R.string.label_eraser_mode)
             }
         }
     }
 
-    override fun onBackPressed() {
-        if (!mPhotoEditor!!.isCacheEmpty) {
+    fun onBackPressed() {
+        if (!mPhotoEditor.isCacheEmpty) {
             showSaveDialog()
         } else {
-            super.onBackPressed()
+            findNavController().popBackStack()
         }
     }
 
     companion object {
-        private val TAG = EditImageActivity::class.java.simpleName
+        private val TAG = EditImageFragment::class.java.simpleName
     }
-
-    override val layoutRes: Int
-        get() = R.layout.activity_edit_image
-
-    override fun viewModel(): Class<MainViewModel> = MainViewModel::class.java
-
-    override fun bindingVariable(): Int = BR.main
 }

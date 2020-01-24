@@ -7,12 +7,17 @@ import android.os.Bundle
 import android.provider.MediaStore
 import android.view.Menu
 import android.view.MenuItem
+import androidx.navigation.findNavController
+import androidx.navigation.ui.AppBarConfiguration
+import androidx.navigation.ui.setupActionBarWithNavController
 import com.example.pixman.BR
 import com.example.pixman.R
 import com.example.pixman.databinding.ActivityMainBinding
 import com.example.pixman.ui.base.BaseActivity
-import com.example.pixman.ui.view.EditImageActivity
+import com.example.pixman.ui.view.EditImageFragment
+import com.example.pixman.ui.view.HomeFragment
 import com.example.pixman.ui.viewmodel.MainViewModel
+import com.example.pixman.util.getFragmentInstance
 import kotlinx.android.synthetic.main.activity_main.*
 import java.io.IOException
 
@@ -40,6 +45,17 @@ class MainActivity : BaseActivity<ActivityMainBinding, MainViewModel>() {
             intent.action = Intent.ACTION_GET_CONTENT
             startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_REQUEST)
         }
+
+        val navController = findNavController(R.id.nav_host_fragment_main)
+
+        // Set up toolbar with navigation
+        setupActionBarWithNavController(navController, AppBarConfiguration(setOf(R.id.home)))
+
+        navController.addOnDestinationChangedListener { _, destination, _ ->
+            when (destination.id) {
+                R.id.editImage -> makeFullScreen()
+            }
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -64,12 +80,22 @@ class MainActivity : BaseActivity<ActivityMainBinding, MainViewModel>() {
             when (requestCode) {
                 CAMERA_REQUEST -> {
                     val photo = data?.extras!!["data"] as Bitmap?
-                    startEditActivity(data)
+                    getFragmentInstance<HomeFragment>(
+                        supportFragmentManager,
+                        R.id.nav_host_fragment_main
+                    ) {
+                        navigateToEdit(photo)
+                    }
                 }
                 PICK_REQUEST -> try {
                     val uri = data?.data
                     val bitmap = MediaStore.Images.Media.getBitmap(contentResolver, uri)
-                    startEditActivity(data)
+                    getFragmentInstance<HomeFragment>(
+                        supportFragmentManager,
+                        R.id.nav_host_fragment_main
+                    ) {
+                        navigateToEdit(bitmap)
+                    }
                 } catch (e: IOException) {
                     e.printStackTrace()
                 }
@@ -77,9 +103,23 @@ class MainActivity : BaseActivity<ActivityMainBinding, MainViewModel>() {
         }
     }
 
-    private fun startEditActivity(data: Intent?) {
-        val intent = Intent(this, EditImageActivity::class.java)
-        intent.putExtra("BitmapImage", data)
-        startActivity(intent)
+    override fun onSupportNavigateUp() = findNavController(R.id.nav_host_fragment_main).navigateUp()
+
+    override fun onBackPressed() {
+        val navController = findNavController(R.id.nav_host_fragment_main)
+        val currentDestination = navController.currentDestination
+        if (currentDestination != null) {
+            when (currentDestination.id) {
+                R.id.editImage -> getFragmentInstance<EditImageFragment>(
+                    supportFragmentManager,
+                    R.id.nav_host_fragment_main
+                ) {
+                    onBackPressed()
+                }
+                else -> super.onBackPressed()
+            }
+        } else {
+            super.onBackPressed()
+        }
     }
 }

@@ -86,7 +86,7 @@ class TextEditorDialogFragment : DialogFragment() {
         mAddTextEditText.setText(arguments!!.getString(EXTRA_INPUT_TEXT))
         mColorCode = arguments!!.getInt(EXTRA_COLOR_CODE)
         mAddTextEditText.setTextColor(mColorCode)
-        mInputMethodManager!!.toggleSoftInput(
+        mInputMethodManager.toggleSoftInput(
             InputMethodManager.SHOW_FORCED,
             0
         )
