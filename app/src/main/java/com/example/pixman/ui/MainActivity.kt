@@ -35,20 +35,12 @@ class MainActivity : BaseActivity<ActivityMainBinding, MainViewModel>() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
-
-        fab.setOnClickListener {
-            val intent = Intent()
-            intent.type = "image/*"
-            intent.action = Intent.ACTION_GET_CONTENT
-            startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_REQUEST)
-        }
 
         val navController = findNavController(R.id.nav_host_fragment_main)
 
         // Set up toolbar with navigation
-        setupActionBarWithNavController(navController, AppBarConfiguration(setOf(R.id.home)))
+//        setupActionBarWithNavController(navController, AppBarConfiguration(setOf(R.id.home)))
 
         navController.addOnDestinationChangedListener { _, destination, _ ->
             when (destination.id) {
