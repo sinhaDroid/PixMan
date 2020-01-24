@@ -6,7 +6,7 @@
         <import type="android.view.View" />
 
         <variable
-            name="main"
+            name="home"
             type="com.example.pixman.ui.viewmodel.MainViewModel" />
     </data>
 
