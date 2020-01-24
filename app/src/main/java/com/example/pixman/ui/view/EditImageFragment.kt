@@ -2,16 +2,14 @@ package com.example.pixman.ui.view
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.content.Intent
-import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
-import android.provider.MediaStore
 import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AlertDialog
 import androidx.navigation.fragment.findNavController
+import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.pixman.BR
 import com.example.pixman.R
@@ -39,6 +37,8 @@ class EditImageFragment : BaseFragment<FragmentEditImageBinding, MainViewModel>(
     private var mPropertiesBSFragment: PropertiesBSFragment? = null
     private val mEditingToolsAdapter = EditingToolsAdapter(this)
 
+    private val args: EditImageFragmentArgs by navArgs()
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -59,19 +59,9 @@ class EditImageFragment : BaseFragment<FragmentEditImageBinding, MainViewModel>(
         mPropertiesBSFragment!!.setPropertiesChangeListener(this)
         mPhotoEditor.setOnPhotoEditorListener(this)
 
-        // Get data from intent
-        val intent = requireActivity().intent
-        val bitmapIntent = intent.getParcelableExtra("BitmapImage") as Intent
-        val uri = bitmapIntent.data
-        var bitmap: Bitmap? = null
-        try {
-            bitmap = MediaStore.Images.Media.getBitmap(requireActivity().contentResolver, uri)
-            //Set Image Dynamically
-            dataBinding.photoEditorView.source.setImageBitmap(bitmap)
-        } catch (e: IOException) {
-            e.printStackTrace()
-            requireActivity().finish()
-        }
+        // Get data from navigation args
+        //Set Image Dynamically
+        dataBinding.photoEditorView.source.setImageBitmap(args.bitmapData)
     }
 
     override fun onEditTextChangeListener(

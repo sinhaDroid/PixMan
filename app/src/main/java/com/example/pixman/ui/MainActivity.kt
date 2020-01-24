@@ -95,6 +95,7 @@ class MainActivity : BaseActivity<ActivityMainBinding, MainViewModel>() {
                     ) {
                         navigateToEdit(bitmap)
                     }
+
                 } catch (e: IOException) {
                     e.printStackTrace()
                 }
